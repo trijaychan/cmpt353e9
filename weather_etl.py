@@ -24,7 +24,14 @@ def main(in_directory, out_directory):
     weather = spark.read.csv(in_directory, schema=observation_schema)
 
     # TODO: finish here.
-
+    
+    cleaned_data = weather.filter(weather["qflag"].isNull()) \
+        .filter(weather["station"].startswith("CA")) \
+        .filter(weather["observation"] == "TMAX") \
+        .withColumn("tmax", weather["value"] / 10) 
+    
+    cleaned_data = cleaned_data.select("station", "date", "tmax")
+    
     cleaned_data.write.json(out_directory, compression='gzip', mode='overwrite')
 
 
